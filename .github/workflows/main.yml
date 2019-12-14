@@ -1,0 +1,22 @@
+name: CI
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.100'
+      - name: Build
+        run: dotnet build
+      - name: Publish to DockerHub
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: sahtivahti/apigw
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
