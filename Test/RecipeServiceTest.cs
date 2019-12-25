@@ -130,5 +130,50 @@ namespace apigw.Test
             Assert.Equal(recipe.Name, result.Name);
             _mockProviderService.VerifyInteractions();
         }
+
+        [Fact]
+        public async void CreateRecipe_WillReturn201()
+        {
+            var recipe = new Recipe
+            {
+                Name = "My new recipe!",
+                Author = "panomies@sahtivahti.fi"
+            };
+
+            _mockProviderService
+                .Given("There is no recipes for panomies")
+                .UponReceiving("POST to create recipe")
+                .With(new ProviderServiceRequest
+                {
+                    Method = HttpVerb.Post,
+                    Path = "/v1/recipe",
+                    Body = new {
+                        name = "My new recipe!",
+                        author = "panomies@sahtivahti.fi"
+                    },
+                    Headers = new Dictionary<string, object>
+                    {
+                        { "Content-Type", "application/json; charset=utf-8" },
+                    }
+                })
+                .WillRespondWith(new ProviderServiceResponse
+                {
+                    Status = 201,
+                    Headers = new Dictionary<string, object>
+                    {
+                        { "Content-Type", "application/json" }
+                    },
+                    Body = new {
+                        name = "My new recipe!",
+                        author = "panomies@sahtivahti.fi"
+                    }
+                });
+
+            var consumer = new RecipeService(_mockProviderServiceBaseUri);
+            var result = await consumer.CreateRecipe(recipe);
+
+            Assert.Equal(recipe.Name, result.Name);
+            _mockProviderService.VerifyInteractions();
+        }
     }
 }

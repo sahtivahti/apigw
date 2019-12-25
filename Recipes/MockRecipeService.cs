@@ -31,5 +31,10 @@ namespace apigw.Recipes
         {
             return Task.FromResult(recipe);
         }
+
+        public Task<Recipe> CreateRecipe(Recipe recipe)
+        {
+            return Task.FromResult(recipe);
+        }
     }
 }

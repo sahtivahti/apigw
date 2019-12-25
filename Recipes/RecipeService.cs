@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using apigw.Util;
 
 namespace apigw.Recipes
 {
@@ -21,18 +19,22 @@ namespace apigw.Recipes
         {
             var result = await _client.GetAsync("/v1/recipe");
 
-            var body = await result.Content.ReadAsStringAsync();
-
-            return JsonConvert.DeserializeObject<IEnumerable<Recipe>>(body);
+            return await result.Content.ReadAsAsync<IEnumerable<Recipe>>();
         }
 
         public async Task<Recipe> GetRecipeById(int id)
         {
             var result = await _client.GetAsync($"/v1/recipe/{id}");
 
+            return await result.Content.ReadAsAsync<Recipe>();
+        }
+
+        public async Task<Recipe> CreateRecipe(Recipe recipe)
+        {
+            var result = await _client.PostJsonAsync($"/v1/recipe", recipe);
             var body = await result.Content.ReadAsStringAsync();
 
-            return JsonConvert.DeserializeObject<Recipe>(body);
+            return await result.Content.ReadAsAsync<Recipe>();
         }
 
         public async Task<Recipe> UpdateRecipe(Recipe recipe)
@@ -41,23 +43,9 @@ namespace apigw.Recipes
                 throw new ArgumentNullException();
             }
 
-            var result = await _client.PutAsync<Recipe>($"/v1/recipe/{recipe.Id}", recipe, GetFormatter());
-            var body = await result.Content.ReadAsStringAsync();
+            var result = await _client.PutJsonAsync($"/v1/recipe/{recipe.Id}", recipe);
 
-            return JsonConvert.DeserializeObject<Recipe>(body);
-        }
-
-        private static JsonMediaTypeFormatter GetFormatter()
-        {
-            var formatter = new JsonMediaTypeFormatter();
-
-            formatter.SerializerSettings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-
-            return formatter;
+            return await result.Content.ReadAsAsync<Recipe>();
         }
     }
 }
