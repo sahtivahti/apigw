@@ -1,12 +1,10 @@
 using System.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using apigw.Pact;
 using apigw.Recipes;
 using PactNet.Mocks.MockHttpService;
 using PactNet.Mocks.MockHttpService.Models;
 using Xunit;
-using Newtonsoft.Json;
 
 namespace apigw.Test
 {
@@ -51,7 +49,6 @@ namespace apigw.Test
             var result = await consumer.GetRecipes();
 
             Assert.Equal(result.Count(), response.Count());
-
             _mockProviderService.VerifyInteractions();
         }
 
