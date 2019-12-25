@@ -91,11 +91,11 @@ namespace apigw.Test
         public async void UpdateRecipe_WillReturn200()
         {
             var body = new
-                {
-                    id = 1,
-                    name = "My updated recipe",
-                    author = "panomestari@sahtivahti.fi"
-                };
+            {
+                id = 1,
+                name = "My updated recipe",
+                author = "panomestari@sahtivahti.fi"
+            };
 
             var recipe = new Recipe
             {
