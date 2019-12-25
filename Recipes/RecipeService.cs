@@ -39,7 +39,8 @@ namespace apigw.Recipes
 
         public async Task<Recipe> UpdateRecipe(Recipe recipe)
         {
-            if (recipe.Id == null) {
+            if (recipe.Id == null)
+            {
                 throw new ArgumentNullException();
             }
 
