@@ -1,0 +1,81 @@
+{
+  "consumer": {
+    "name": "API GW"
+  },
+  "provider": {
+    "name": "Recipe Service"
+  },
+  "interactions": [
+    {
+      "description": "GET request to retrieve recipe",
+      "providerState": "There is a recipe with id 1",
+      "request": {
+        "method": "get",
+        "path": "/v1/recipe/1"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "id": 1,
+          "name": "My another recipe",
+          "author": "panomestari@sahtivahti.fi"
+        }
+      }
+    },
+    {
+      "description": "GET request to retrieve recipes",
+      "providerState": "There is some recipes",
+      "request": {
+        "method": "get",
+        "path": "/v1/recipe"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "name": "My another recipe",
+            "author": "panomestari@sahtivahti.fi"
+          }
+        ]
+      }
+    },
+    {
+      "description": "PUT to update recipe",
+      "providerState": "There is a recipe with id 1",
+      "request": {
+        "method": "put",
+        "path": "/v1/recipe/1",
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "id": 1,
+          "name": "My updated recipe",
+          "author": "panomestari@sahtivahti.fi"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "id": 1,
+          "name": "My updated recipe",
+          "author": "panomestari@sahtivahti.fi"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "1.0.0"
+    }
+  }
+}

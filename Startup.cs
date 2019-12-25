@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using apigw.Recipes;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,12 @@ namespace apigw
                 options.Authority = _configuration["Auth0:Domain"];
                 options.Audience = _configuration["Auth0:ApiIdentifier"];
             });
+
+            services.AddSingleton<IRecipeService>(
+                new RecipeService(
+                    _configuration["ServiceUris:RecipeService"]
+                )
+            );
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
