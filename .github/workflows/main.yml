@@ -16,6 +16,15 @@ jobs:
         run: dotnet build
       - name: Test
         run: dotnet test
+      - name: Publish Pacts
+        env:
+          PACT_BROKER_USERNAME: ${{ secrets.PACT_BROKER_USERNAME }}
+          PACT_BROKER_PASSWORD: ${{ secrets.PACT_BROKER_PASSWORD }}
+          PACT_BROKER_HOST: ${{ secrets.PACT_BROKER_HOST }} 
+        run: |
+          curl -XPUT \-H "Content-Type: application/json" \
+            -d@pacts/api_gw-recipe_service.json \
+            https://${PACT_BROKER_USERNAME}:${PACT_BROKER_PASSWORD}@${PACT_BROKER_HOST}/pacts/provider/Recipe%20Service/consumer/API%20GW/version/${GITHUB_SHA}
       - name: Publish to DockerHub
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
