@@ -24,7 +24,14 @@ namespace apigw.Test
         public async void GetRecipes_WillReturn200()
         {
             var response = new List<object>();
-            response.Add(new { name = "My another recipe", author = "panomestari@sahtivahti.fi" });
+            response.Add(
+                new
+                {
+                    name = "My another recipe",
+                    author = "panomestari@sahtivahti.fi",
+                    userId = "auth0|foobar"
+                }
+            );
 
             _mockProviderService
                 .Given("There is some recipes")
@@ -69,7 +76,8 @@ namespace apigw.Test
                     Body = new {
                         id = 1,
                         name = "My another recipe",
-                        author = "panomestari@sahtivahti.fi"
+                        author = "panomestari@sahtivahti.fi",
+                        userId = "auth0|foobar"
                     },
                     Headers = new Dictionary<string, object>
                     {
@@ -91,14 +99,16 @@ namespace apigw.Test
             {
                 id = 1,
                 name = "My updated recipe",
-                author = "panomestari@sahtivahti.fi"
+                author = "panomestari@sahtivahti.fi",
+                userId = "auth0|foobar"
             };
 
             var recipe = new Recipe
             {
                 Id = 1,
                 Name = "My updated recipe",
-                Author = "panomestari@sahtivahti.fi"
+                Author = "panomestari@sahtivahti.fi",
+                UserId = "auth0|foobar"
             };
 
             _mockProviderService
@@ -137,7 +147,8 @@ namespace apigw.Test
             var recipe = new Recipe
             {
                 Name = "My new recipe!",
-                Author = "panomies@sahtivahti.fi"
+                Author = "panomies@sahtivahti.fi",
+                UserId = "auth0|foobar"
             };
 
             _mockProviderService
@@ -149,7 +160,8 @@ namespace apigw.Test
                     Path = "/v1/recipe",
                     Body = new {
                         name = "My new recipe!",
-                        author = "panomies@sahtivahti.fi"
+                        author = "panomies@sahtivahti.fi",
+                        userId = "auth0|foobar"
                     },
                     Headers = new Dictionary<string, object>
                     {
@@ -165,7 +177,8 @@ namespace apigw.Test
                     },
                     Body = new {
                         name = "My new recipe!",
-                        author = "panomies@sahtivahti.fi"
+                        author = "panomies@sahtivahti.fi",
+                        userId = "auth0|foobar"
                     }
                 });
 

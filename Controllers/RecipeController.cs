@@ -29,14 +29,9 @@ namespace apigw.Controllers
         [Authorize]
         public async Task<Recipe> CreateRecipe([FromBody] Recipe recipe)
         {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
 
-            if (email == null)
-            {
-                throw new ArgumentNullException("User email");
-            }
-
-            recipe.Author = email;
+            recipe.UserId = userId;
 
             return await _recipeService.CreateRecipe(recipe);
         }
