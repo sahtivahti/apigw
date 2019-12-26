@@ -1,4 +1,5 @@
-﻿using apigw.Recipes;
+﻿using System;
+using apigw.Recipes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Polly;
 
 namespace apigw
 {
@@ -39,11 +41,18 @@ namespace apigw
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sahtivahti API", Version = "v0.0.1" });
             });
 
-            services.AddSingleton<IRecipeService>(
-                new RecipeService(
-                    _configuration["ServiceUris:RecipeService"]
-                )
-            );
+            services.AddHttpClient("RecipeService", client =>
+            {
+                client.BaseAddress = new System.Uri(_configuration["RecipeService:BaseUri"]);
+            })
+            .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(new []
+            {
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(10)
+            }));
+
+            services.AddTransient<IRecipeService, RecipeService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

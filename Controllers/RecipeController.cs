@@ -1,4 +1,3 @@
-using System;
 using System.Security.Claims;
 using System.Linq;
 using System.Collections.Generic;
@@ -27,13 +26,18 @@ namespace apigw.Controllers
 
         [HttpPost("/v1/recipe")]
         [Authorize]
-        public async Task<Recipe> CreateRecipe([FromBody] Recipe recipe)
+        public async Task<IActionResult> CreateRecipe([FromBody] Recipe recipe)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
 
             recipe.UserId = userId;
 
-            return await _recipeService.CreateRecipe(recipe);
+            return Created("Recipe", await _recipeService.CreateRecipe(recipe));
         }
     }
 }

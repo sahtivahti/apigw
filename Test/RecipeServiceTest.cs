@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using apigw.Pact;
@@ -5,6 +6,8 @@ using apigw.Recipes;
 using PactNet.Mocks.MockHttpService;
 using PactNet.Mocks.MockHttpService.Models;
 using Xunit;
+using Moq;
+using System.Net.Http;
 
 namespace apigw.Test
 {
@@ -51,7 +54,7 @@ namespace apigw.Test
                     }
                 });
 
-            var consumer = new RecipeService(_mockProviderServiceBaseUri);
+            var consumer = CreateConsumer();
 
             var result = await consumer.GetRecipes();
 
@@ -85,7 +88,7 @@ namespace apigw.Test
                     }
                 });
 
-            var consumer = new RecipeService(_mockProviderServiceBaseUri);
+            var consumer = CreateConsumer();
             var result = await consumer.GetRecipeById(1);
 
             Assert.Equal("My another recipe", result.Name);
@@ -134,7 +137,7 @@ namespace apigw.Test
                     Body = body
                 });
 
-            var consumer = new RecipeService(_mockProviderServiceBaseUri);
+            var consumer = CreateConsumer();
             var result = await consumer.UpdateRecipe(recipe);
 
             Assert.Equal(recipe.Name, result.Name);
@@ -182,11 +185,23 @@ namespace apigw.Test
                     }
                 });
 
-            var consumer = new RecipeService(_mockProviderServiceBaseUri);
+            var consumer = CreateConsumer();
             var result = await consumer.CreateRecipe(recipe);
 
             Assert.Equal(recipe.Name, result.Name);
             _mockProviderService.VerifyInteractions();
+        }
+
+        private RecipeService CreateConsumer()
+        {
+            var mockFactory = new Mock<IHttpClientFactory>();
+            mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>()))
+                .Returns(new HttpClient
+                {
+                    BaseAddress = new Uri(_mockProviderServiceBaseUri)
+                });
+
+            return new RecipeService(mockFactory.Object);
         }
     }
 }

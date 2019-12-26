@@ -8,30 +8,37 @@ namespace apigw.Recipes
 {
     public class RecipeService : IRecipeService
     {
-        private readonly HttpClient _client;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public RecipeService(string baseUri)
+        public RecipeService(IHttpClientFactory httpClientFactory)
         {
-            _client = new HttpClient { BaseAddress = new Uri(baseUri) };
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<IEnumerable<Recipe>> GetRecipes()
         {
-            var result = await _client.GetAsync("/v1/recipe");
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.GetAsync("/v1/recipe");
 
             return await result.Content.ReadAsAsync<IEnumerable<Recipe>>();
         }
 
         public async Task<Recipe> GetRecipeById(int id)
         {
-            var result = await _client.GetAsync($"/v1/recipe/{id}");
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.GetAsync($"/v1/recipe/{id}");
 
             return await result.Content.ReadAsAsync<Recipe>();
         }
 
         public async Task<Recipe> CreateRecipe(Recipe recipe)
         {
-            var result = await _client.PostJsonAsync($"/v1/recipe", recipe);
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.PostJsonAsync($"/v1/recipe", recipe);
+
             var body = await result.Content.ReadAsStringAsync();
 
             return await result.Content.ReadAsAsync<Recipe>();
@@ -44,7 +51,9 @@ namespace apigw.Recipes
                 throw new ArgumentNullException();
             }
 
-            var result = await _client.PutJsonAsync($"/v1/recipe/{recipe.Id}", recipe);
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.PutJsonAsync($"/v1/recipe/{recipe.Id}", recipe);
 
             return await result.Content.ReadAsAsync<Recipe>();
         }
