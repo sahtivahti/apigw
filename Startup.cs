@@ -22,7 +22,6 @@ namespace apigw
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(option => option.EnableEndpointRouting = false);
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", builder =>
@@ -33,6 +32,8 @@ namespace apigw
                         .AllowAnyHeader();
                 });
             });
+
+            services.AddMvc(option => option.EnableEndpointRouting = false);
 
             services
                 .AddAuthentication(options =>
@@ -72,7 +73,7 @@ namespace apigw
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors();
+            app.UseCors("AllowAll");
             app.UseAuthentication();
 
             app.UseSwagger();
