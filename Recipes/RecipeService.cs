@@ -1,3 +1,4 @@
+using System.Net;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -30,6 +31,11 @@ namespace apigw.Recipes
 
             var result = await client.GetAsync($"/v1/recipe/{id}");
 
+            if (result.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new RecipeNotFoundException();
+            }
+
             return await result.Content.ReadAsAsync<Recipe>();
         }
 
@@ -55,7 +61,24 @@ namespace apigw.Recipes
 
             var result = await client.PutJsonAsync($"/v1/recipe/{recipe.Id}", recipe);
 
+            if (result.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new RecipeNotFoundException();
+            }
+
             return await result.Content.ReadAsAsync<Recipe>();
+        }
+
+        public async Task RemoveRecipeById(int id)
+        {
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.DeleteAsync($"/v1/recipe/{id}");
+
+            if (result.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new RecipeNotFoundException();
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ namespace apigw.Test
         public async void GetRecipes_WillReturn200()
         {
             var response = new List<object>();
+
             response.Add(
                 new
                 {
@@ -59,6 +60,31 @@ namespace apigw.Test
             var result = await consumer.GetRecipes();
 
             Assert.Equal(result.Count(), response.Count());
+            _mockProviderService.VerifyInteractions();
+        }
+
+        [Fact]
+        public async void GetRecipeByIdThatNotExist_WillReturn404()
+        {
+            _mockProviderService
+                .Given("There is no recipe with id 666")
+                .UponReceiving("GET request to retrieve recipe")
+                .With(new ProviderServiceRequest
+                {
+                    Method = HttpVerb.Get,
+                    Path = "/v1/recipe/666"
+                })
+                .WillRespondWith(new ProviderServiceResponse
+                {
+                    Status = 404
+                });
+
+            var consumer = CreateConsumer();
+
+            await Assert.ThrowsAsync<RecipeNotFoundException>(
+                async () => await consumer.GetRecipeById(666)
+            );
+
             _mockProviderService.VerifyInteractions();
         }
 

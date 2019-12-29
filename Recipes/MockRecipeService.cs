@@ -1,7 +1,8 @@
+using System.Threading;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using apigw.Util;
 
 namespace apigw.Recipes
 {
@@ -13,13 +14,22 @@ namespace apigw.Recipes
             {
                 Id = 1,
                 Name = "My another recipe",
-                Author = "panomestari@sahtivahti.fi"
+                Author = "panomestari@sahtivahti.fi",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             }
         };
 
         public Task<Recipe> GetRecipeById(int id)
         {
-            return Task.FromResult(recipes.First(x => x.Id == id));
+            var recipe = recipes.FirstOrDefault(x => x.Id == id);
+
+            if (recipe == null)
+            {
+                throw new RecipeNotFoundException();
+            }
+
+            return Task.FromResult(recipe);
         }
 
         public Task<IEnumerable<Recipe>> GetRecipes()
@@ -35,6 +45,11 @@ namespace apigw.Recipes
         public Task<Recipe> CreateRecipe(Recipe recipe)
         {
             return Task.FromResult(recipe);
+        }
+
+        public Task RemoveRecipeById(int id)
+        {
+            return Task.Factory.StartNew(() => Thread.Sleep(100));
         }
     }
 }

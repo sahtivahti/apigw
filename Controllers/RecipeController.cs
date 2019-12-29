@@ -39,5 +39,57 @@ namespace apigw.Controllers
 
             return Created("Recipe", await _recipeService.CreateRecipe(recipe));
         }
+
+        [HttpPut("/v1/recipe/{id}")]
+        public async Task<IActionResult> UpdateRecipe([FromBody] Recipe recipe, int id)
+        {
+            recipe.Id = id;
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var result = await _recipeService.UpdateRecipe(recipe);
+
+                return Ok(result);
+            }
+            catch (RecipeNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpGet("/v1/recipe/{id}")]
+        public async Task<IActionResult> GetRecipeDetails(int id)
+        {
+            try
+            {
+                var recipe = await _recipeService.GetRecipeById(id);
+
+                return Ok(recipe);
+            }
+            catch (RecipeNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("/v1/recipe/{id}")]
+        public async Task<IActionResult> RemoveRecipe(int id)
+        {
+            try
+            {
+                await _recipeService.RemoveRecipeById(id);
+            }
+            catch (RecipeNotFoundException)
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
     }
 }

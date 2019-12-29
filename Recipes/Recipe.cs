@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace apigw.Recipes
@@ -14,5 +15,9 @@ namespace apigw.Recipes
 
         [Required]
         public string Name { get; set; }
+
+        public DateTime? CreatedAt { get; set; } = null;
+
+        public DateTime? UpdatedAt { get; set; } = null;
     }
 }
