@@ -1,6 +1,7 @@
 # SAHTIVAHTI-APIGW
 
 [![Actions Status](https://github.com/sahtivahti/apigw/workflows/CI/badge.svg)](https://github.com/sahtivahti/apigw/actions)
+[![Actions Status](https://github.com/sahtivahti/apigw/workflows/Publish/badge.svg)](https://github.com/sahtivahti/apigw/actions)
 
 API GW for the Sahtivahti app
 

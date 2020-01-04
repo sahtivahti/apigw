@@ -25,10 +25,3 @@ jobs:
           curl -XPUT \-H "Content-Type: application/json" \
             -d@pacts/api_gw-recipe_service.json \
             https://${PACT_BROKER_USERNAME}:${PACT_BROKER_PASSWORD}@${PACT_BROKER_HOST}/pacts/provider/Recipe%20Service/consumer/API%20GW/version/${GITHUB_SHA}
-      - name: Publish to DockerHub
-        uses: elgohr/Publish-Docker-Github-Action@master
-        with:
-          name: sahtivahti/apigw
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          tag_names: true
