@@ -107,6 +107,7 @@ namespace apigw.Controllers
             }
         }
 
+        [HttpDelete("/v1/recipe/{recipeId}/hop/{hopId}")]
         public async Task<IActionResult> RemoveHopFromRecipe(int recipeId, int hopId)
         {
             try
