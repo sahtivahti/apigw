@@ -91,5 +91,34 @@ namespace apigw.Controllers
 
             return Ok();
         }
+
+        [HttpPost("/v1/recipe/{recipeId}/hop")]
+        public async Task<IActionResult> AddHopToRecipe([FromBody] Hop hop, int recipeId)
+        {
+            try
+            {
+                var result = await _recipeService.AddHopToRecipe(hop, recipeId);
+
+                return Created("", result);
+            }
+            catch (RecipeNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        public async Task<IActionResult> RemoveHopFromRecipe(int recipeId, int hopId)
+        {
+            try
+            {
+                var result = await _recipeService.RemoveHopFromRecipe(hopId, recipeId);
+
+                return Ok(result);
+            }
+            catch (RecipeNotFoundException)
+            {
+                return NotFound();
+            }
+        }
     }
 }

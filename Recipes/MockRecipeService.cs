@@ -51,5 +51,15 @@ namespace apigw.Recipes
         {
             return Task.Factory.StartNew(() => Thread.Sleep(100));
         }
+
+        public Task<Hop> AddHopToRecipe(Hop hop, int recipeId)
+        {
+            return Task.FromResult(hop);
+        }
+
+        public Task<Hop> RemoveHopFromRecipe(int hopId, int recipeId)
+        {
+            return Task.FromResult(new Hop());
+        }
     }
 }

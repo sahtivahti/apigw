@@ -33,7 +33,8 @@ namespace apigw.Test
                 {
                     name = "My another recipe",
                     author = "panomestari@sahtivahti.fi",
-                    userId = "auth0|foobar"
+                    userId = "auth0|foobar",
+                    style = "IPA"
                 }
             );
 
@@ -106,7 +107,9 @@ namespace apigw.Test
                         id = 1,
                         name = "My another recipe",
                         author = "panomestari@sahtivahti.fi",
-                        userId = "auth0|foobar"
+                        userId = "auth0|foobar",
+                        style = "IPA",
+                        batchSize = 20.5
                     },
                     Headers = new Dictionary<string, object>
                     {
@@ -129,7 +132,9 @@ namespace apigw.Test
                 id = 1,
                 name = "My updated recipe",
                 author = "panomestari@sahtivahti.fi",
-                userId = "auth0|foobar"
+                userId = "auth0|foobar",
+                style = "IPA",
+                batchSize = 20.5
             };
 
             var recipe = new Recipe
@@ -137,7 +142,9 @@ namespace apigw.Test
                 Id = 1,
                 Name = "My updated recipe",
                 Author = "panomestari@sahtivahti.fi",
-                UserId = "auth0|foobar"
+                UserId = "auth0|foobar",
+                Style = "IPA",
+                BatchSize = 20.5
             };
 
             _mockProviderService
@@ -177,7 +184,9 @@ namespace apigw.Test
             {
                 Name = "My new recipe!",
                 Author = "panomies@sahtivahti.fi",
-                UserId = "auth0|foobar"
+                UserId = "auth0|foobar",
+                BatchSize = 20.5,
+                Style = "Belgian Pale Ale"
             };
 
             _mockProviderService
@@ -190,7 +199,9 @@ namespace apigw.Test
                     Body = new {
                         name = "My new recipe!",
                         author = "panomies@sahtivahti.fi",
-                        userId = "auth0|foobar"
+                        userId = "auth0|foobar",
+                        batchSize = 20.5,
+                        style = "Belgian Pale Ale"
                     },
                     Headers = new Dictionary<string, object>
                     {
@@ -207,7 +218,10 @@ namespace apigw.Test
                     Body = new {
                         name = "My new recipe!",
                         author = "panomies@sahtivahti.fi",
-                        userId = "auth0|foobar"
+                        userId = "auth0|foobar",
+                        batchSize = 20.5,
+                        style = "Belgian Pale Ale",
+                        hops = new string[0]
                     }
                 });
 

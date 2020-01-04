@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,8 +17,14 @@ namespace apigw.Recipes
         [Required]
         public string Name { get; set; }
 
+        public string Style { get; set; }
+
+        public double BatchSize { get; set; }
+
         public DateTime? CreatedAt { get; set; } = null;
 
         public DateTime? UpdatedAt { get; set; } = null;
+
+        public IEnumerable<Hop> Hops { get; set; } = null;
     }
 }

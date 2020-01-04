@@ -80,5 +80,33 @@ namespace apigw.Recipes
                 throw new RecipeNotFoundException();
             }
         }
+
+        public async Task<Hop> AddHopToRecipe(Hop hop, int recipeId)
+        {
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.PostJsonAsync($"/v1/recipe/{recipeId}/hop", hop);
+
+            if (result.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new RecipeNotFoundException();
+            }
+
+            return await result.Content.ReadAsAsync<Hop>();
+        }
+
+        public async Task<Hop> RemoveHopFromRecipe(int hopId, int recipeId)
+        {
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.DeleteAsync($"/v1/recipe/{recipeId}/hop/{hopId}");
+
+            if (result.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new RecipeNotFoundException();
+            }
+
+            return await result.Content.ReadAsAsync<Hop>();
+        }
     }
 }
