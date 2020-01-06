@@ -61,5 +61,15 @@ namespace apigw.Recipes
         {
             return Task.FromResult(new Hop());
         }
+
+        public Task<Fermentable> AddFermentableToRecipe(Fermentable fermentable, int recipeId)
+        {
+            return Task.FromResult(fermentable);
+        }
+
+        public Task<Fermentable> RemoveFermentableFromRecipe(int fermentableId, int recipeId)
+        {
+            return Task.FromResult(new Fermentable());
+        }
     }
 }

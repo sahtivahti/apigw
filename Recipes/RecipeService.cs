@@ -108,5 +108,33 @@ namespace apigw.Recipes
 
             return await result.Content.ReadAsAsync<Hop>();
         }
+
+        public async Task<Fermentable> AddFermentableToRecipe(Fermentable fermentable, int recipeId)
+        {
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.PostJsonAsync($"/v1/recipe/{recipeId}/fermentable", fermentable);
+
+            if (result.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new RecipeNotFoundException();
+            }
+
+            return await result.Content.ReadAsAsync<Fermentable>();
+        }
+
+        public async Task<Fermentable> RemoveFermentableFromRecipe(int fermentableId, int recipeId)
+        {
+            using var client = _httpClientFactory.CreateClient("RecipeService");
+
+            var result = await client.DeleteAsync($"/v1/recipe/{recipeId}/fermentable/{fermentableId}");
+
+            if (result.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new RecipeNotFoundException();
+            }
+
+            return await result.Content.ReadAsAsync<Fermentable>();
+        }
     }
 }

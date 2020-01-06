@@ -12,5 +12,7 @@ namespace apigw.Recipes
         public Task RemoveRecipeById(int id);
         public Task<Hop> AddHopToRecipe(Hop hop, int recipeId);
         public Task<Hop> RemoveHopFromRecipe(int hopId, int recipeId);
+        public Task<Fermentable> AddFermentableToRecipe(Fermentable fermentable, int recipeId);
+        public Task<Fermentable> RemoveFermentableFromRecipe(int fermentableId, int recipeId);
     }
 }

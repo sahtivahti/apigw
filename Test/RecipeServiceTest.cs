@@ -221,7 +221,8 @@ namespace apigw.Test
                         userId = "auth0|foobar",
                         batchSize = 20.5,
                         style = "Belgian Pale Ale",
-                        hops = new string[0]
+                        hops = new string[]{},
+                        fermentables = new string[]{}
                     }
                 });
 

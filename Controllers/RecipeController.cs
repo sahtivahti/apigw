@@ -43,12 +43,12 @@ namespace apigw.Controllers
         [HttpPut("/v1/recipe/{id}")]
         public async Task<IActionResult> UpdateRecipe([FromBody] Recipe recipe, int id)
         {
-            recipe.Id = id;
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
+            recipe.Id = id;
 
             try
             {
@@ -113,6 +113,36 @@ namespace apigw.Controllers
             try
             {
                 var result = await _recipeService.RemoveHopFromRecipe(hopId, recipeId);
+
+                return Ok(result);
+            }
+            catch (RecipeNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost("/v1/recipe/{recipeId}/fermentable")]
+        public async Task<IActionResult> AddFermentableToRecipe([FromBody] Fermentable fermentable, int recipeId)
+        {
+            try
+            {
+                var result = await _recipeService.AddFermentableToRecipe(fermentable, recipeId);
+
+                return Created("", result);
+            }
+            catch (RecipeNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("/v1/recipe/{recipeId}/fermentable/{fermentableId}")]
+        public async Task<IActionResult> RemoveFermentableFromRecipe(int recipeId, int fermentableId)
+        {
+            try
+            {
+                var result = await _recipeService.RemoveFermentableFromRecipe(fermentableId, recipeId);
 
                 return Ok(result);
             }
