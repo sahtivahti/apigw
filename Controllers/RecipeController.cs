@@ -5,16 +5,19 @@ using System.Threading.Tasks;
 using apigw.Recipes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using apigw.BeerCalculator;
 
 namespace apigw.Controllers
 {
     public class RecipeController : Controller
     {
         private readonly IRecipeService _recipeService;
+        private readonly IBeerCalculator _calculator;
 
-        public RecipeController(IRecipeService recipeService)
+        public RecipeController(IRecipeService recipeService, IBeerCalculator calculator)
         {
             _recipeService = recipeService;
+            _calculator = calculator;
         }
 
         [HttpGet("/v1/recipe")]
@@ -65,16 +68,25 @@ namespace apigw.Controllers
         [HttpGet("/v1/recipe/{id}")]
         public async Task<IActionResult> GetRecipeDetails(int id)
         {
+            var response = new RecipeDetailsResponse();
+
+            Recipe recipe;
+
             try
             {
-                var recipe = await _recipeService.GetRecipeById(id);
+                recipe = await _recipeService.GetRecipeById(id);
 
-                return Ok(recipe);
+                response.Apply(recipe);
             }
             catch (RecipeNotFoundException)
             {
                 return NotFound();
             }
+
+            // Calculate recipe information
+            response.Apply(await _calculator.GetForRecipe(recipe));
+
+            return Ok(response);
         }
 
         [HttpDelete("/v1/recipe/{id}")]
@@ -93,7 +105,7 @@ namespace apigw.Controllers
         }
 
         [HttpPost("/v1/recipe/{recipeId}/hop")]
-        public async Task<IActionResult> AddHopToRecipe([FromBody] Hop hop, int recipeId)
+        public async Task<IActionResult> AddHopToRecipe([FromBody] Recipes.Hop hop, int recipeId)
         {
             try
             {
@@ -123,7 +135,7 @@ namespace apigw.Controllers
         }
 
         [HttpPost("/v1/recipe/{recipeId}/fermentable")]
-        public async Task<IActionResult> AddFermentableToRecipe([FromBody] Fermentable fermentable, int recipeId)
+        public async Task<IActionResult> AddFermentableToRecipe([FromBody] Recipes.Fermentable fermentable, int recipeId)
         {
             try
             {

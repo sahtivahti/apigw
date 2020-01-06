@@ -1,4 +1,5 @@
 ﻿using System;
+using apigw.BeerCalculator;
 using apigw.Recipes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -63,7 +64,13 @@ namespace apigw
                 TimeSpan.FromSeconds(10)
             }));
 
+            services.AddHttpClient("BeerCalculator", client =>
+            {
+                client.BaseAddress = new System.Uri(_configuration["BeerCalculator:BaseUri"]);
+            });
+
             services.AddTransient<IRecipeService, RecipeService>();
+            services.AddTransient<IBeerCalculator, BeerCalculator.BeerCalculator>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -21,11 +21,12 @@ namespace apigw.Recipes
 
         public double BatchSize { get; set; }
 
-        public DateTime? CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; } = null;
 
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; } = null;
 
         public IEnumerable<Hop> Hops { get; set; }
+
         public IEnumerable<Fermentable> Fermentables { get; set; }
     }
 }
