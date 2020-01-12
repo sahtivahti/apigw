@@ -1,13 +1,16 @@
 ﻿using System;
+using apigw.Cache;
 using apigw.ExternalServices.BeerCalculator;
 using apigw.ExternalServices.RecipeService;
 using apigw.Recipes;
+using EasyCaching.Core.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Polly;
 
@@ -72,9 +75,22 @@ namespace apigw
 
             services.AddEasyCaching(options =>
             {
-                options.UseInMemory("inMemory");
+                if (_configuration["Cache:Redis:Host"] != null)
+                {
+                    options.UseRedis(redis =>
+                    {
+                        redis.DBConfig.Endpoints.Add(
+                            new ServerEndPoint(_configuration["Cache:Redis:Host"], 6379)
+                        );
+                    }, "cache");
+                }
+                else
+                {
+                    options.UseInMemory("cache");
+                }
             });
 
+            services.AddTransient(typeof(ICache<>), typeof(SimpleCache<>));
             services.AddTransient<IRecipeServiceClient, RecipeServiceHttpClient>();
             services.AddTransient<IRecipeService, RecipeService>();
             services.AddTransient<IBeerCalculator, HttpBeerCalculator>();

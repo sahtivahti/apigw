@@ -8,6 +8,7 @@ namespace apigw.Recipes
     {
         public Task<IEnumerable<RecipeListItem>> GetRecipes();
         public Task<RecipeDetails> GetRecipeById(int id);
+        public Task<RecipeDetails> GetCachedRecipeById(int id);
         public Task<Recipe> UpdateRecipe(Recipe recipe);
         public Task<Recipe> CreateRecipe(Recipe recipe);
         public Task RemoveRecipeById(int id);
