@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-namespace apigw.BeerCalculator
+namespace apigw.ExternalServices.BeerCalculator
 {
     public class CalculationRequest
     {

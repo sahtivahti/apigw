@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using apigw.Recipes;
 using apigw.Util;
 
-namespace apigw.BeerCalculator
+namespace apigw.ExternalServices.BeerCalculator
 {
-    public class BeerCalculator : IBeerCalculator
+    public class HttpBeerCalculator : IBeerCalculator
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public BeerCalculator(IHttpClientFactory httpClientFactory)
+        public HttpBeerCalculator(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
         }
@@ -37,7 +37,7 @@ namespace apigw.BeerCalculator
             return await Calculate(request);
         }
 
-        private async Task<CalculationResponse> Calculate(CalculationRequest request)
+        public async Task<CalculationResponse> Calculate(CalculationRequest request)
         {
             using var client = _httpClientFactory.CreateClient("BeerCalculator");
 

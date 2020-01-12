@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using apigw.Pact;
-using apigw.Recipes;
 using PactNet.Mocks.MockHttpService;
 using PactNet.Mocks.MockHttpService.Models;
 using Xunit;
 using Moq;
 using System.Net.Http;
+using apigw.ExternalServices.RecipeService;
+using apigw.ExternalServices.RecipeService.Model;
 
 namespace apigw.Test
 {
@@ -83,7 +84,7 @@ namespace apigw.Test
             var consumer = CreateConsumer();
 
             await Assert.ThrowsAsync<RecipeNotFoundException>(
-                async () => await consumer.GetRecipeById(666)
+                async () => await consumer.GetById(666)
             );
 
             _mockProviderService.VerifyInteractions();
@@ -118,7 +119,7 @@ namespace apigw.Test
                 });
 
             var consumer = CreateConsumer();
-            var result = await consumer.GetRecipeById(1);
+            var result = await consumer.GetById(1);
 
             Assert.Equal("My another recipe", result.Name);
             _mockProviderService.VerifyInteractions();
@@ -129,20 +130,16 @@ namespace apigw.Test
         {
             var body = new
             {
-                id = 1,
                 name = "My updated recipe",
                 author = "panomestari@sahtivahti.fi",
-                userId = "auth0|foobar",
                 style = "IPA",
                 batchSize = 20.5
             };
 
-            var recipe = new Recipe
+            var request = new UpdateRecipeRequest
             {
-                Id = 1,
                 Name = "My updated recipe",
                 Author = "panomestari@sahtivahti.fi",
-                UserId = "auth0|foobar",
                 Style = "IPA",
                 BatchSize = 20.5
             };
@@ -171,16 +168,16 @@ namespace apigw.Test
                 });
 
             var consumer = CreateConsumer();
-            var result = await consumer.UpdateRecipe(recipe);
+            var result = await consumer.UpdateById(1, request);
 
-            Assert.Equal(recipe.Name, result.Name);
+            Assert.Equal(request.Name, result.Name);
             _mockProviderService.VerifyInteractions();
         }
 
         [Fact]
         public async void CreateRecipe_WillReturn201()
         {
-            var recipe = new Recipe
+            var recipe = new CreateRecipeRequest
             {
                 Name = "My new recipe!",
                 Author = "panomies@sahtivahti.fi",
@@ -227,13 +224,13 @@ namespace apigw.Test
                 });
 
             var consumer = CreateConsumer();
-            var result = await consumer.CreateRecipe(recipe);
+            var result = await consumer.Create(recipe);
 
             Assert.Equal(recipe.Name, result.Name);
             _mockProviderService.VerifyInteractions();
         }
 
-        private RecipeService CreateConsumer()
+        private RecipeServiceHttpClient CreateConsumer()
         {
             var mockFactory = new Mock<IHttpClientFactory>();
             mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>()))
@@ -242,7 +239,7 @@ namespace apigw.Test
                     BaseAddress = new Uri(_mockProviderServiceBaseUri)
                 });
 
-            return new RecipeService(mockFactory.Object);
+            return new RecipeServiceHttpClient(mockFactory.Object);
         }
     }
 }

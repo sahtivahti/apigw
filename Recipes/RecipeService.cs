@@ -1,140 +1,207 @@
-using System.Net;
+using System.Linq;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
-using apigw.Util;
+using apigw.ExternalServices.RecipeService;
+using apigw.Recipes.Model;
+using apigw.ExternalServices.RecipeService.Model;
+using apigw.ExternalServices.BeerCalculator;
 
 namespace apigw.Recipes
 {
     public class RecipeService : IRecipeService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IRecipeServiceClient _recipeServiceClient;
+        private readonly IBeerCalculator _beerCalculator;
 
-        public RecipeService(IHttpClientFactory httpClientFactory)
+        public RecipeService(
+            IRecipeServiceClient recipeServiceClient,
+            IBeerCalculator beerCalculator)
         {
-            _httpClientFactory = httpClientFactory;
-        }
-
-        public async Task<IEnumerable<Recipe>> GetRecipes()
-        {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.GetAsync("/v1/recipe");
-
-            return await result.Content.ReadAsAsync<IEnumerable<Recipe>>();
-        }
-
-        public async Task<Recipe> GetRecipeById(int id)
-        {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.GetAsync($"/v1/recipe/{id}");
-
-            if (result.StatusCode == HttpStatusCode.NotFound)
-            {
-                throw new RecipeNotFoundException();
-            }
-
-            return await result.Content.ReadAsAsync<Recipe>();
-        }
-
-        public async Task<Recipe> CreateRecipe(Recipe recipe)
-        {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.PostJsonAsync($"/v1/recipe", recipe);
-
-            var body = await result.Content.ReadAsStringAsync();
-
-            return await result.Content.ReadAsAsync<Recipe>();
-        }
-
-        public async Task<Recipe> UpdateRecipe(Recipe recipe)
-        {
-            if (recipe.Id == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.PutJsonAsync($"/v1/recipe/{recipe.Id}", recipe);
-
-            if (result.StatusCode == HttpStatusCode.NotFound)
-            {
-                throw new RecipeNotFoundException();
-            }
-
-            return await result.Content.ReadAsAsync<Recipe>();
-        }
-
-        public async Task RemoveRecipeById(int id)
-        {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.DeleteAsync($"/v1/recipe/{id}");
-
-            if (result.StatusCode == HttpStatusCode.NotFound)
-            {
-                throw new RecipeNotFoundException();
-            }
-        }
-
-        public async Task<Hop> AddHopToRecipe(Hop hop, int recipeId)
-        {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.PostJsonAsync($"/v1/recipe/{recipeId}/hop", hop);
-
-            if (result.StatusCode == HttpStatusCode.NotFound)
-            {
-                throw new RecipeNotFoundException();
-            }
-
-            return await result.Content.ReadAsAsync<Hop>();
-        }
-
-        public async Task<Hop> RemoveHopFromRecipe(int hopId, int recipeId)
-        {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.DeleteAsync($"/v1/recipe/{recipeId}/hop/{hopId}");
-
-            if (result.StatusCode == HttpStatusCode.NotFound)
-            {
-                throw new RecipeNotFoundException();
-            }
-
-            return await result.Content.ReadAsAsync<Hop>();
+            _recipeServiceClient = recipeServiceClient;
+            _beerCalculator = beerCalculator;
         }
 
         public async Task<Fermentable> AddFermentableToRecipe(Fermentable fermentable, int recipeId)
         {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.PostJsonAsync($"/v1/recipe/{recipeId}/fermentable", fermentable);
-
-            if (result.StatusCode == HttpStatusCode.NotFound)
+            var request = new CreateFermentableRequest
             {
-                throw new RecipeNotFoundException();
-            }
+                Name = fermentable.Name,
+                Color = fermentable.Color,
+                Quantity = fermentable.Quantity
+            };
 
-            return await result.Content.ReadAsAsync<Fermentable>();
+            var result = await _recipeServiceClient.AddFermentableById(recipeId, request);
+
+            return new Fermentable
+            {
+                Id = result.Id,
+                Name = result.Name,
+                Color = result.Color,
+                Quantity = result.Quantity
+            };
         }
 
-        public async Task<Fermentable> RemoveFermentableFromRecipe(int fermentableId, int recipeId)
+        public async Task<Hop> AddHopToRecipe(Hop hop, int recipeId)
         {
-            using var client = _httpClientFactory.CreateClient("RecipeService");
-
-            var result = await client.DeleteAsync($"/v1/recipe/{recipeId}/fermentable/{fermentableId}");
-
-            if (result.StatusCode == HttpStatusCode.NotFound)
+            var request = new CreateHopRequest
             {
-                throw new RecipeNotFoundException();
-            }
+                Name = hop.Name,
+                Quantity = hop.Quantity,
+                Time = hop.Time
+            };
 
-            return await result.Content.ReadAsAsync<Fermentable>();
+            var result = await _recipeServiceClient.AddHopById(recipeId, request);
+
+            return new Hop
+            {
+                Id = result.Id,
+                Name = result.Name,
+                Quantity = result.Quantity,
+                Time = result.Time
+            };
+        }
+
+        public async Task<Recipe> CreateRecipe(Recipe recipe)
+        {
+            var request = new CreateRecipeRequest
+            {
+                Name = recipe.Name,
+                Author = recipe.Author,
+                UserId = recipe.UserId,
+                Style = recipe.Style,
+                BatchSize = recipe.BatchSize
+            };
+
+            var result = await _recipeServiceClient.Create(request);
+
+            return new Recipe
+            {
+                Id = result.Id,
+                Name = result.Name,
+                Author = result.Author,
+                UserId = result.UserId,
+                Style = result.Style,
+                BatchSize = result.BatchSize,
+                CreatedAt = result.CreatedAt,
+                UpdatedAt = result.UpdatedAt
+            };
+        }
+
+        public async Task<RecipeDetails> GetRecipeById(int id)
+        {
+            var result = await _recipeServiceClient.GetById(id);
+
+            var meta = await _beerCalculator.Calculate(new CalculationRequest
+            {
+                BatchSize = result.BatchSize,
+                BoilSize = 1.2 * result.BatchSize,
+                Hops = result.Hops.Select(hop => new ExternalServices.BeerCalculator.Hop
+                {
+                    Weight = hop.Quantity / 1000,
+                    Aa = 5.0,
+                    Time = hop.Time
+                }),
+                Fermentables = result.Fermentables.Select(f => new ExternalServices.BeerCalculator.Fermentable
+                {
+                    Weight = f.Quantity,
+                    Color = f.Color
+                })
+            });
+
+            return new RecipeDetails
+            {
+                Id = result.Id,
+                Name = result.Name,
+                Author = result.Author,
+                Style = result.Style,
+                BatchSize = result.BatchSize,
+                CreatedAt = result.CreatedAt,
+                UpdatedAt = result.UpdatedAt.GetValueOrDefault(),
+                Hops = result.Hops.Select(h => new Hop
+                {
+                    Id = h.Id,
+                    Name = h.Name,
+                    Quantity = h.Quantity,
+                    Time = h.Time
+                }),
+                Fermentables = result.Fermentables.Select(f => new Fermentable
+                {
+                    Id = f.Id,
+                    Name = f.Name,
+                    Quantity = f.Quantity,
+                    Color = f.Color
+                }),
+                Abv = meta.Abv,
+                FinalGravity = meta.Fg,
+                OriginalGravity = meta.Og,
+                Color = meta.ColorEbc,
+                ColorName = meta.ColorName
+            };
+        }
+
+        public async Task<IEnumerable<Model.RecipeListItem>> GetRecipes()
+        {
+            var recipes = await _recipeServiceClient.GetRecipes();
+
+            return recipes.Select(x => new Model.RecipeListItem
+            {
+                Id = x.Id,
+                Name = x.Name
+            });
+        }
+
+        public async Task RemoveFermentableFromRecipe(int fermentableId, int recipeId)
+        {
+            await _recipeServiceClient.DeleteFermentableById(recipeId, fermentableId);
+        }
+
+        public async Task RemoveHopFromRecipe(int hopId, int recipeId)
+        {
+            await _recipeServiceClient.DeleteHopById(recipeId, hopId);
+        }
+
+        public async Task RemoveRecipeById(int id)
+        {
+            await _recipeServiceClient.DeleteById(id);
+        }
+
+        public async Task<Recipe> UpdateRecipe(Recipe recipe)
+        {
+            var recipeId = recipe.Id ?? throw new InvalidOperationException("Can't update recipe without id");
+
+            var request = new UpdateRecipeRequest
+            {
+                Name = recipe.Name,
+                Author = recipe.Author,
+                Style = recipe.Style,
+                BatchSize = recipe.BatchSize
+            };
+
+            var result = await _recipeServiceClient.UpdateById(recipeId, request);
+
+            return new Recipe
+            {
+                Id = result.Id,
+                Name = result.Name,
+                Author = result.Author,
+                Style = recipe.Style,
+                BatchSize = recipe.BatchSize,
+                Hops = result.Hops.Select(h => new Hop
+                {
+                    Id = h.Id,
+                    Name = h.Name,
+                    Quantity = h.Quantity,
+                    Time = h.Time
+                }),
+                Fermentables = result.Fermentables.Select(f => new Fermentable
+                {
+                    Id = f.Id,
+                    Name = f.Name,
+                    Quantity = f.Quantity,
+                    Color = f.Color
+                })
+            };
         }
     }
 }

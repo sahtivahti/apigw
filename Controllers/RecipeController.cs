@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using System.Linq;
 using System.Collections.Generic;
@@ -5,31 +6,29 @@ using System.Threading.Tasks;
 using apigw.Recipes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using apigw.BeerCalculator;
+using apigw.Recipes.Model;
 
 namespace apigw.Controllers
 {
     public class RecipeController : Controller
     {
         private readonly IRecipeService _recipeService;
-        private readonly IBeerCalculator _calculator;
 
-        public RecipeController(IRecipeService recipeService, IBeerCalculator calculator)
+        public RecipeController(IRecipeService recipeService)
         {
             _recipeService = recipeService;
-            _calculator = calculator;
         }
 
         [HttpGet("/v1/recipe")]
         [Authorize]
-        public async Task<IEnumerable<Recipe>> GetAllRecipes()
+        public async Task<IEnumerable<RecipeListItem>> GetAllRecipes()
         {
             return await _recipeService.GetRecipes();
         }
 
         [HttpPost("/v1/recipe")]
         [Authorize]
-        public async Task<IActionResult> CreateRecipe([FromBody] Recipe recipe)
+        public async Task<ActionResult<RecipeDetails>> CreateRecipe([FromBody] Recipe recipe)
         {
             if (!ModelState.IsValid)
             {
@@ -40,11 +39,18 @@ namespace apigw.Controllers
 
             recipe.UserId = userId;
 
-            return Created("Recipe", await _recipeService.CreateRecipe(recipe));
+            var result = await _recipeService.CreateRecipe(recipe);
+
+            return Created(
+                "Recipe",
+                await _recipeService.GetRecipeById(
+                    result.Id ?? throw new InvalidOperationException("Can't load recipe without id")
+                )
+            );
         }
 
         [HttpPut("/v1/recipe/{id}")]
-        public async Task<IActionResult> UpdateRecipe([FromBody] Recipe recipe, int id)
+        public async Task<ActionResult<RecipeDetails>> UpdateRecipe([FromBody] Recipe recipe, int id)
         {
             if (!ModelState.IsValid)
             {
@@ -55,38 +61,27 @@ namespace apigw.Controllers
 
             try
             {
-                var result = await _recipeService.UpdateRecipe(recipe);
+                await _recipeService.UpdateRecipe(recipe);
 
-                return Ok(result);
+                return Ok(await _recipeService.GetRecipeById(id));
             }
-            catch (RecipeNotFoundException)
+            catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
                 return NotFound();
             }
         }
 
         [HttpGet("/v1/recipe/{id}")]
-        public async Task<IActionResult> GetRecipeDetails(int id)
+        public async Task<ActionResult<RecipeDetails>> GetRecipeDetails(int id)
         {
-            var response = new RecipeDetailsResponse();
-
-            Recipe recipe;
-
             try
             {
-                recipe = await _recipeService.GetRecipeById(id);
-
-                response.Apply(recipe);
+                return Ok(await _recipeService.GetRecipeById(id));
             }
-            catch (RecipeNotFoundException)
+            catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
                 return NotFound();
             }
-
-            // Calculate recipe information
-            response.Apply(await _calculator.GetForRecipe(recipe));
-
-            return Ok(response);
         }
 
         [HttpDelete("/v1/recipe/{id}")]
@@ -96,7 +91,7 @@ namespace apigw.Controllers
             {
                 await _recipeService.RemoveRecipeById(id);
             }
-            catch (RecipeNotFoundException)
+            catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
                 return NotFound();
             }
@@ -105,7 +100,7 @@ namespace apigw.Controllers
         }
 
         [HttpPost("/v1/recipe/{recipeId}/hop")]
-        public async Task<IActionResult> AddHopToRecipe([FromBody] Recipes.Hop hop, int recipeId)
+        public async Task<ActionResult<Recipes.Hop>> AddHopToRecipe([FromBody] Recipes.Hop hop, int recipeId)
         {
             try
             {
@@ -113,7 +108,7 @@ namespace apigw.Controllers
 
                 return Created("", result);
             }
-            catch (RecipeNotFoundException)
+            catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
                 return NotFound();
             }
@@ -124,18 +119,18 @@ namespace apigw.Controllers
         {
             try
             {
-                var result = await _recipeService.RemoveHopFromRecipe(hopId, recipeId);
+                await _recipeService.RemoveHopFromRecipe(hopId, recipeId);
 
-                return Ok(result);
+                return Ok();
             }
-            catch (RecipeNotFoundException)
+            catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
                 return NotFound();
             }
         }
 
         [HttpPost("/v1/recipe/{recipeId}/fermentable")]
-        public async Task<IActionResult> AddFermentableToRecipe([FromBody] Recipes.Fermentable fermentable, int recipeId)
+        public async Task<ActionResult<Recipes.Fermentable>> AddFermentableToRecipe([FromBody] Recipes.Fermentable fermentable, int recipeId)
         {
             try
             {
@@ -143,7 +138,7 @@ namespace apigw.Controllers
 
                 return Created("", result);
             }
-            catch (RecipeNotFoundException)
+            catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
                 return NotFound();
             }
@@ -154,11 +149,11 @@ namespace apigw.Controllers
         {
             try
             {
-                var result = await _recipeService.RemoveFermentableFromRecipe(fermentableId, recipeId);
+                await _recipeService.RemoveFermentableFromRecipe(fermentableId, recipeId);
 
-                return Ok(result);
+                return Ok();
             }
-            catch (RecipeNotFoundException)
+            catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
                 return NotFound();
             }

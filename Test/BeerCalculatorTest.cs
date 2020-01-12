@@ -6,7 +6,7 @@ using Xunit;
 using Moq;
 using System.Net.Http;
 using PactNet.Mocks.MockHttpService.Models;
-using apigw.Recipes;
+using apigw.ExternalServices.BeerCalculator;
 
 namespace apigw.Test
 {
@@ -25,14 +25,16 @@ namespace apigw.Test
         [Fact]
         public async void AnalyzeRecipe_WillReturn200()
         {
-            var recipe = new Recipe
+            var request = new CalculationRequest
             {
                 BatchSize = 10,
+                BoilSize = 12,
                 Hops = new List<Hop>
                 {
                     new Hop
                     {
-                        Quantity = 20,
+                        Weight = 0.02,
+                        Aa = 5,
                         Time = 60
                     }
                 },
@@ -40,7 +42,7 @@ namespace apigw.Test
                 {
                     new Fermentable
                     {
-                        Quantity = 5,
+                        Weight = 5,
                         Color = 7
                     }
                 }
@@ -101,7 +103,7 @@ namespace apigw.Test
 
             var consumer = CreateConsumer();
 
-            var result = await consumer.GetForRecipe(recipe);
+            var result = await consumer.Calculate(request);
 
             Assert.Equal(1.1, result.Og);
             Assert.Equal(1.02, result.Fg);
@@ -114,7 +116,7 @@ namespace apigw.Test
             _mockProviderService.VerifyInteractions();
         }
 
-        private BeerCalculator.BeerCalculator CreateConsumer()
+        private IBeerCalculator CreateConsumer()
         {
             var mockFactory = new Mock<IHttpClientFactory>();
             mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>()))
@@ -123,7 +125,7 @@ namespace apigw.Test
                     BaseAddress = new Uri(_mockProviderServiceBaseUri)
                 });
 
-            return new BeerCalculator.BeerCalculator(mockFactory.Object);
+            return new HttpBeerCalculator(mockFactory.Object);
         }
     }
 }

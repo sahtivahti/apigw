@@ -1,6 +1,6 @@
 using System;
 
-namespace apigw.Recipes
+namespace apigw.ExternalServices.RecipeService
 {
     public class RecipeNotFoundException : Exception
     {
