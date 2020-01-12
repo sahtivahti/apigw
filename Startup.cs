@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Polly;
 
@@ -77,12 +76,15 @@ namespace apigw
             {
                 if (_configuration["Cache:Redis:Host"] != null)
                 {
+                    options.WithJson("json");
+
                     options.UseRedis(redis =>
                     {
                         redis.DBConfig.Endpoints.Add(
                             new ServerEndPoint(_configuration["Cache:Redis:Host"], 6379)
                         );
 
+                        redis.SerializerName = "json";
                         redis.EnableLogging = true;
                     }, "cache");
                 }
