@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace apigw.Recipes.Model
 {
+    [Serializable]
     public class RecipeDetails
     {
         public int Id { get; set; }

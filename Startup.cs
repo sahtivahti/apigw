@@ -82,6 +82,8 @@ namespace apigw
                         redis.DBConfig.Endpoints.Add(
                             new ServerEndPoint(_configuration["Cache:Redis:Host"], 6379)
                         );
+
+                        redis.EnableLogging = true;
                     }, "cache");
                 }
                 else
