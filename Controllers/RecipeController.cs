@@ -43,7 +43,7 @@ namespace apigw.Controllers
 
             return Created(
                 "Recipe",
-                await _recipeService.GetRecipeById(
+                await _recipeService.GetCachedRecipeById(
                     result.Id ?? throw new InvalidOperationException("Can't load recipe without id")
                 )
             );
@@ -63,7 +63,7 @@ namespace apigw.Controllers
             {
                 await _recipeService.UpdateRecipe(recipe);
 
-                return Ok(await _recipeService.GetRecipeById(id));
+                return Ok(await _recipeService.GetCachedRecipeById(id));
             }
             catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
@@ -76,7 +76,7 @@ namespace apigw.Controllers
         {
             try
             {
-                return Ok(await _recipeService.GetRecipeById(id));
+                return Ok(await _recipeService.GetCachedRecipeById(id));
             }
             catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
