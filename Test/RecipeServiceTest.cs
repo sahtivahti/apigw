@@ -232,14 +232,14 @@ namespace apigw.Test
 
         private RecipeServiceHttpClient CreateConsumer()
         {
-            var mockFactory = new Mock<IHttpClientFactory>();
-            mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>()))
+            var httpClientMock = new Mock<IHttpClientFactory>();
+            httpClientMock.Setup(_ => _.CreateClient(It.IsAny<string>()))
                 .Returns(new HttpClient
                 {
                     BaseAddress = new Uri(_mockProviderServiceBaseUri)
                 });
 
-            return new RecipeServiceHttpClient(mockFactory.Object);
+            return new RecipeServiceHttpClient(httpClientMock.Object);
         }
     }
 }

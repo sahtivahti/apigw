@@ -70,6 +70,11 @@ namespace apigw
                 client.BaseAddress = new System.Uri(_configuration["BeerCalculator:BaseUri"]);
             });
 
+            services.AddEasyCaching(options =>
+            {
+                options.UseInMemory("inMemory");
+            });
+
             services.AddTransient<IRecipeServiceClient, RecipeServiceHttpClient>();
             services.AddTransient<IRecipeService, RecipeService>();
             services.AddTransient<IBeerCalculator, HttpBeerCalculator>();

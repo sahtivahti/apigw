@@ -6,6 +6,7 @@ using apigw.ExternalServices.RecipeService;
 using apigw.Recipes.Model;
 using apigw.ExternalServices.RecipeService.Model;
 using apigw.ExternalServices.BeerCalculator;
+using EasyCaching.Core;
 
 namespace apigw.Recipes
 {
@@ -13,13 +14,16 @@ namespace apigw.Recipes
     {
         private readonly IRecipeServiceClient _recipeServiceClient;
         private readonly IBeerCalculator _beerCalculator;
+        private readonly IEasyCachingProvider _cache;
 
         public RecipeService(
             IRecipeServiceClient recipeServiceClient,
-            IBeerCalculator beerCalculator)
+            IBeerCalculator beerCalculator,
+            IEasyCachingProviderFactory cacheProviderFactory)
         {
             _recipeServiceClient = recipeServiceClient;
             _beerCalculator = beerCalculator;
+            _cache = cacheProviderFactory.GetCachingProvider("inMemory");
         }
 
         public async Task<Fermentable> AddFermentableToRecipe(Fermentable fermentable, int recipeId)
@@ -90,6 +94,15 @@ namespace apigw.Recipes
 
         public async Task<RecipeDetails> GetRecipeById(int id)
         {
+            var cacheKey = $"recipe.details.{id}";
+
+            var cached = await _cache.GetAsync<RecipeDetails>(cacheKey);
+
+            if (cached.HasValue)
+            {
+                return cached.Value;
+            }
+
             var result = await _recipeServiceClient.GetById(id);
 
             var meta = await _beerCalculator.Calculate(new CalculationRequest
@@ -109,7 +122,7 @@ namespace apigw.Recipes
                 })
             });
 
-            return new RecipeDetails
+            var response = new RecipeDetails
             {
                 Id = result.Id,
                 Name = result.Name,
@@ -139,6 +152,10 @@ namespace apigw.Recipes
                 ColorName = meta.ColorName,
                 Ibu = meta.Ibu
             };
+
+            await _cache.TrySetAsync<RecipeDetails>(cacheKey, response, TimeSpan.FromMinutes(5));
+
+            return response;
         }
 
         public async Task<IEnumerable<Model.RecipeListItem>> GetRecipes()
@@ -180,6 +197,8 @@ namespace apigw.Recipes
             };
 
             var result = await _recipeServiceClient.UpdateById(recipeId, request);
+
+            await _cache.RemoveAsync($"recipe.details.{recipe.Id}");
 
             return new Recipe
             {

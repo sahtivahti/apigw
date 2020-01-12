@@ -3,6 +3,8 @@ using apigw.ExternalServices.BeerCalculator;
 using apigw.ExternalServices.RecipeService;
 using apigw.ExternalServices.RecipeService.Model;
 using apigw.Recipes;
+using apigw.Recipes.Model;
+using EasyCaching.Core;
 using Moq;
 using Xunit;
 
@@ -10,19 +12,22 @@ namespace apigw.Test.Integration.Recipes
 {
     public class RecipeServiceTest
     {
-        private Mock<IRecipeServiceClient> _recipeServiceClientMock { get; set; }
-        private Mock<IBeerCalculator> _beerCalculatorMock { get; set; }
+        private readonly Mock<IRecipeServiceClient> _recipeServiceClientMock;
+        private readonly Mock<IBeerCalculator> _beerCalculatorMock;
+        private readonly Mock<IEasyCachingProviderFactory> _cacheProviderFactory;
+        private readonly Mock<IEasyCachingProvider> _cacheMock;
 
         public RecipeServiceTest()
         {
             _recipeServiceClientMock = new Mock<IRecipeServiceClient>();
             _beerCalculatorMock = new Mock<IBeerCalculator>();
+            _cacheProviderFactory = new Mock<IEasyCachingProviderFactory>();
+            _cacheMock = new Mock<IEasyCachingProvider>();
         }
 
         [Fact]
         public async void GetRecipeDetails_WillCombineResultsFromRequiredServices()
         {
-
             _recipeServiceClientMock.Setup(_ => _.GetById(It.IsAny<int>()))
                 .Returns(Task.FromResult(new RecipeDetailsResponse
                 {
@@ -44,7 +49,17 @@ namespace apigw.Test.Integration.Recipes
                     Ibu = 50
                 }));
 
-            var recipeService = new RecipeService(_recipeServiceClientMock.Object, _beerCalculatorMock.Object);
+            _cacheProviderFactory.Setup(_ => _.GetCachingProvider(It.IsAny<string>()))
+                .Returns(_cacheMock.Object);
+
+            _cacheMock.Setup(_ => _.GetAsync<RecipeDetails>(It.IsAny<string>()))
+                .Returns(Task.FromResult(new CacheValue<RecipeDetails>(null, false)));
+
+            var recipeService = new RecipeService(
+                _recipeServiceClientMock.Object,
+                _beerCalculatorMock.Object,
+                _cacheProviderFactory.Object
+            );
 
             var recipe = await recipeService.GetRecipeById(1);
 
