@@ -136,7 +136,8 @@ namespace apigw.Recipes
                 FinalGravity = meta.Fg,
                 OriginalGravity = meta.Og,
                 Color = meta.ColorEbc,
-                ColorName = meta.ColorName
+                ColorName = meta.ColorName,
+                Ibu = meta.Ibu
             };
         }
 
