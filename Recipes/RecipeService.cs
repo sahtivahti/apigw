@@ -138,14 +138,14 @@ namespace apigw.Recipes
                     Name = h.Name,
                     Quantity = h.Quantity,
                     Time = h.Time
-                }),
+                }).ToArray(),
                 Fermentables = result.Fermentables.Select(f => new Fermentable
                 {
                     Id = f.Id,
                     Name = f.Name,
                     Quantity = f.Quantity,
                     Color = f.Color
-                }),
+                }).ToArray(),
                 Abv = meta.Abv,
                 FinalGravity = meta.Fg,
                 OriginalGravity = meta.Og,
