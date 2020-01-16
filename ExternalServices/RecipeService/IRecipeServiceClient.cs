@@ -14,6 +14,6 @@ namespace apigw.ExternalServices.RecipeService
         Task DeleteHopById(int recipeId, int hopId);
         Task<FermentableDetailsResponse> AddFermentableById(int recipeId, CreateFermentableRequest request);
         Task DeleteFermentableById(int recipeId, int fermentableId);
-        Task<IEnumerable<RecipeListItem>> GetRecipes();
+        Task<IEnumerable<RecipeListItem>> SearchRecipes(RecipeSearchFilters filters);
     }
 }

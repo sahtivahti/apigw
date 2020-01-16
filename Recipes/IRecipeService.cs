@@ -6,7 +6,7 @@ namespace apigw.Recipes
 {
     public interface IRecipeService
     {
-        public Task<IEnumerable<RecipeListItem>> GetRecipes();
+        public Task<IEnumerable<RecipeListItem>> GetRecipesForUser(string userId);
         public Task<RecipeDetails> GetRecipeById(int id);
         public Task<RecipeDetails> GetCachedRecipeById(int id);
         public Task<Recipe> UpdateRecipe(Recipe recipe);

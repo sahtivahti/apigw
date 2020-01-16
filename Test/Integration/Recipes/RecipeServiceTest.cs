@@ -68,5 +68,24 @@ namespace apigw.Test.Integration.Recipes
             Assert.Equal(7.6, recipe.Color);
             Assert.Equal(50, recipe.Ibu);
         }
+
+        [Fact]
+        public async void GetRecipesForUser_CallsClientWithProperFilters()
+        {
+            var recipeService = new RecipeService(
+                _recipeServiceClientMock.Object,
+                _beerCalculatorMock.Object,
+                _cacheMock.Object
+            );
+
+            await recipeService.GetRecipesForUser("foobaruserid");
+
+            _recipeServiceClientMock.Verify(
+                _ => _.SearchRecipes(
+                    It.Is<RecipeSearchFilters>(x => x.UserId == "foobaruserid")
+                ),
+                Times.Once
+            );
+        }
     }
 }

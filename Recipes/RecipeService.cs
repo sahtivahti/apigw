@@ -155,9 +155,14 @@ namespace apigw.Recipes
             };
         }
 
-        public async Task<IEnumerable<Model.RecipeListItem>> GetRecipes()
+        public async Task<IEnumerable<Model.RecipeListItem>> GetRecipesForUser(string userId)
         {
-            var recipes = await _recipeServiceClient.GetRecipes();
+            var recipes = await _recipeServiceClient.SearchRecipes(
+                new RecipeSearchFilters
+                {
+                    UserId = userId
+                }
+            );
 
             return recipes.Select(x => new Model.RecipeListItem
             {

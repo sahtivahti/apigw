@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using apigw.ExternalServices.RecipeService.Model;
@@ -108,11 +109,11 @@ namespace apigw.ExternalServices.RecipeService
             return await result.Content.ReadAsAsync<RecipeDetailsResponse>();
         }
 
-        public async Task<IEnumerable<RecipeListItem>> GetRecipes()
+        public async Task<IEnumerable<RecipeListItem>> SearchRecipes(RecipeSearchFilters filters)
         {
             using var client = CreateClient();
 
-            var result = await client.GetAsync("/v1/recipe");
+            var result = await client.GetAsync($"/v1/recipe?userId={filters.UserId}");
 
             return await result.Content.ReadAsAsync<IEnumerable<RecipeListItem>>();
         }

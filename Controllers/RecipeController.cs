@@ -21,9 +21,11 @@ namespace apigw.Controllers
 
         [HttpGet("/v1/recipe")]
         [Authorize]
-        public async Task<IEnumerable<RecipeListItem>> GetAllRecipes()
+        public async Task<IEnumerable<RecipeListItem>> GetOwnRecipes()
         {
-            return await _recipeService.GetRecipes();
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+            return await _recipeService.GetRecipesForUser(userId);
         }
 
         [HttpPost("/v1/recipe")]
@@ -61,6 +63,14 @@ namespace apigw.Controllers
 
             try
             {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                var oldRecipe = await _recipeService.GetCachedRecipeById(id);
+
+                if (oldRecipe.UserId != userId)
+                {
+                    return Forbid();
+                }
+
                 await _recipeService.UpdateRecipe(recipe);
 
                 return Ok(await _recipeService.GetCachedRecipeById(id));
@@ -76,7 +86,15 @@ namespace apigw.Controllers
         {
             try
             {
-                return Ok(await _recipeService.GetCachedRecipeById(id));
+                var recipe = await _recipeService.GetCachedRecipeById(id);
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+                if (recipe.UserId != userId)
+                {
+                    return Forbid();
+                }
+
+                return Ok(recipe);
             }
             catch (ExternalServices.RecipeService.RecipeNotFoundException)
             {
@@ -89,6 +107,14 @@ namespace apigw.Controllers
         {
             try
             {
+                var recipe = await _recipeService.GetCachedRecipeById(id);
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+                if (recipe.UserId != userId)
+                {
+                    return Forbid();
+                }
+
                 await _recipeService.RemoveRecipeById(id);
             }
             catch (ExternalServices.RecipeService.RecipeNotFoundException)
@@ -104,6 +130,14 @@ namespace apigw.Controllers
         {
             try
             {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                var recipe = await _recipeService.GetCachedRecipeById(recipeId);
+
+                if (recipe.UserId != userId)
+                {
+                    return Forbid();
+                }
+
                 var result = await _recipeService.AddHopToRecipe(hop, recipeId);
 
                 return Created("", result);
@@ -119,6 +153,14 @@ namespace apigw.Controllers
         {
             try
             {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                var recipe = await _recipeService.GetCachedRecipeById(recipeId);
+
+                if (recipe.UserId != userId)
+                {
+                    return Forbid();
+                }
+
                 await _recipeService.RemoveHopFromRecipe(hopId, recipeId);
 
                 return Ok();
@@ -134,6 +176,14 @@ namespace apigw.Controllers
         {
             try
             {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                var recipe = await _recipeService.GetCachedRecipeById(recipeId);
+
+                if (recipe.UserId != userId)
+                {
+                    return Forbid();
+                }
+
                 var result = await _recipeService.AddFermentableToRecipe(fermentable, recipeId);
 
                 return Created("", result);
@@ -149,6 +199,14 @@ namespace apigw.Controllers
         {
             try
             {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                var recipe = await _recipeService.GetCachedRecipeById(recipeId);
+
+                if (recipe.UserId != userId)
+                {
+                    return Forbid();
+                }
+
                 await _recipeService.RemoveFermentableFromRecipe(fermentableId, recipeId);
 
                 return Ok();

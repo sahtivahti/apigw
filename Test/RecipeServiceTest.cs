@@ -45,7 +45,8 @@ namespace apigw.Test
                 .With(new ProviderServiceRequest
                 {
                     Method = HttpVerb.Get,
-                    Path = "/v1/recipe"
+                    Path = "/v1/recipe",
+                    Query = "userId=auth0userid"
                 })
                 .WillRespondWith(new ProviderServiceResponse
                 {
@@ -59,7 +60,10 @@ namespace apigw.Test
 
             var consumer = CreateConsumer();
 
-            var result = await consumer.GetRecipes();
+            var result = await consumer.SearchRecipes(new RecipeSearchFilters
+            {
+                UserId = "auth0userid"
+            });
 
             Assert.Equal(result.Count(), response.Count());
             _mockProviderService.VerifyInteractions();
