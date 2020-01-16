@@ -132,6 +132,7 @@ namespace apigw.Recipes
                 BatchSize = result.BatchSize,
                 CreatedAt = result.CreatedAt,
                 UpdatedAt = result.UpdatedAt.GetValueOrDefault(),
+                UserId = result.UserId,
                 Hops = result.Hops.Select(h => new Hop
                 {
                     Id = h.Id,

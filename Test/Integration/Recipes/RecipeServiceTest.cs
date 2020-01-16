@@ -34,7 +34,8 @@ namespace apigw.Test.Integration.Recipes
                     Name = "Foo",
                     BatchSize = 20,
                     Style = "IPA",
-                    Author = "sahti.vahti@sahtivahti.fi"
+                    Author = "sahti.vahti@sahtivahti.fi",
+                    UserId = "foobaruser"
                 }));
 
             _beerCalculatorMock.Setup(_ => _.Calculate(It.IsAny<CalculationRequest>()))
@@ -67,6 +68,7 @@ namespace apigw.Test.Integration.Recipes
             Assert.Equal("brown", recipe.ColorName);
             Assert.Equal(7.6, recipe.Color);
             Assert.Equal(50, recipe.Ibu);
+            Assert.Equal("foobaruser", recipe.UserId);
         }
 
         [Fact]
